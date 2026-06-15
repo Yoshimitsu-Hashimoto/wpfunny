@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ワイヤーフレーム｜ペットシッター・マッチング（講座デモ用）</title>
+<style>
+  :root{
+    --line:#c4c4c4;
+    --line-strong:#9a9a9a;
+    --fill:#e3e3e3;
+    --fill-2:#efefef;
+    --ink:#3f3f3f;
+    --muted:#8c8c8c;
+    --note:#3d6699;
+    --note-bg:#eaf1f8;
+    --note-line:#bcd0e6;
+    --bg:#e9e9e9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .board{max-width:1040px;margin:0 auto;padding:32px 20px 80px;}
+  .board-head{margin-bottom:28px;}
+  .board-head h1{font-size:18px;margin:0 0 6px;}
+  .board-head p{margin:0;font-size:13px;color:var(--muted);}
+
+  .legend{
+    display:flex;flex-wrap:wrap;gap:16px;
+    font-size:12px;color:var(--muted);
+    border:1px dashed var(--line);background:#fff;
+    padding:12px 16px;border-radius:6px;margin-top:16px;
+  }
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .swatch{width:22px;height:14px;border:1px solid var(--line);display:inline-block;}
+  .swatch.img{background:repeating-linear-gradient(45deg,#dcdcdc 0 6px,#eee 6px 12px);}
+  .swatch.txt{background:#e0e0e0;}
+  .swatch.btn{background:#fff;border:1.5px solid var(--line-strong);}
+
+  /* 画面フレーム */
+  .screen{background:#fff;border:1px solid var(--line-strong);border-radius:4px;margin-top:34px;overflow:hidden;}
+  .screen-cap{
+    font-size:12px;color:#fff;background:#6f6f6f;
+    padding:6px 12px;font-weight:600;letter-spacing:.02em;
+  }
+  .screen-cap small{font-weight:400;opacity:.8;margin-left:8px;}
+  .browser{display:flex;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--fill-2);}
+  .browser i{width:9px;height:9px;border-radius:50%;background:#cfcfcf;display:inline-block;}
+  .browser .url{flex:1;margin-left:10px;height:18px;background:#fff;border:1px solid var(--line);border-radius:9px;font-size:11px;color:var(--muted);display:flex;align-items:center;padding:0 10px;}
+  .pad{padding:20px;}
+
+  /* サイトヘッダー（ワイヤー内） */
+  .site-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:18px;}
+  .logo{width:120px;height:26px;background:var(--fill);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);}
+  .site-nav{display:flex;gap:10px;}
+
+  /* 部品 */
+  .img{background:repeating-linear-gradient(45deg,#dcdcdc 0 8px,#eee 8px 16px);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;}
+  .bar{height:10px;background:#e2e2e2;border-radius:2px;margin:7px 0;}
+  .bar.w90{width:90%}.bar.w75{width:75%}.bar.w60{width:60%}.bar.w40{width:40%}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--line-strong);background:#fff;color:var(--ink);font-size:13px;padding:8px 16px;border-radius:4px;}
+  .btn.lg{padding:12px 22px;font-size:14px;font-weight:600;}
+  .btn.block{display:flex;width:100%;}
+  .btn.ghost{border-style:dashed;color:var(--muted);}
+  .tabs{display:flex;gap:0;margin:6px 0 14px;}
+  .tabs .tab{flex:1;text-align:center;padding:11px;border:1px solid var(--line-strong);font-size:13px;}
+  .tabs .tab.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .tabs .tab:not(.on){background:#fff;border-left:none;}
+  .tabs .tab:first-child{border-left:1px solid var(--line-strong);}
+  .field{border:1px solid var(--line);border-radius:4px;height:38px;background:var(--fill-2);display:flex;align-items:center;padding:0 10px;color:var(--muted);font-size:12px;}
+  .field.area{height:84px;align-items:flex-start;padding-top:8px;}
+  .field.sel::after{content:"▾";margin-left:auto;color:var(--muted);}
+  .label{font-size:12px;color:var(--ink);margin:12px 0 5px;font-weight:600;}
+  .label .req{color:#c0392b;margin-left:3px;}
+  .pill{display:inline-block;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:11px;padding:2px 9px;margin:3px 4px 3px 0;background:#fff;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;}
+
+  /* 注釈 */
+  .note{font-size:11.5px;color:var(--note);background:var(--note-bg);border:1px dashed var(--note-line);border-radius:5px;padding:7px 11px;margin:10px 0;}
+  .note b{font-weight:700;}
+  .note::before{content:"NOTE ";font-weight:700;opacity:.7;}
+
+  /* レイアウト */
+  .two-col{display:flex;gap:18px;align-items:flex-start;}
+  .sidebar{width:215px;flex:none;border:1px solid var(--line);border-radius:4px;padding:14px;background:var(--fill-2);}
+  .sidebar h4{font-size:12px;margin:0 0 10px;}
+  .main{flex:1;min-width:0;}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .card{border:1px solid var(--line);border-radius:5px;overflow:hidden;background:#fff;}
+  .card .img{height:110px;border:none;border-bottom:1px solid var(--line);}
+  .card .body{padding:11px;}
+  .card .meta{display:flex;justify-content:space-between;align-items:center;margin-top:9px;}
+  .price{font-size:13px;font-weight:700;}
+  .deadline{font-size:12px;color:var(--muted);}
+  .deadline.soon{color:#c0392b;font-weight:700;}
+
+  .steps{display:flex;gap:10px;margin:8px 0;}
+  .step{flex:1;border:1px solid var(--line);border-radius:5px;padding:12px;text-align:center;font-size:12px;color:var(--ink);background:var(--fill-2);}
+  .step .n{display:inline-block;width:22px;height:22px;line-height:22px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--muted);font-size:18px;}
+
+  .hero-title{height:30px;width:60%;background:var(--fill);border:1px solid var(--line);margin:4px 0 14px;}
+
+  @media(max-width:680px){
+    .grid{grid-template-columns:1fr;}
+    .two-col{flex-direction:column;}
+    .sidebar{width:100%;}
+    .steps{flex-direction:column;}
+    .arrow{transform:rotate(90deg);}
+  }
+</style>
+</head>
+<body>
+<div class="board">
+
+  <div class="board-head">
+    <h1>ワイヤーフレーム｜ペットシッター・マッチングサイト（講座デモ用）</h1>
+    <p>装飾なしのざっくり版。グレーの箱＝中身の置き場所。青い NOTE ＝設計分岐マップとの対応メモ。</p>
+    <div class="legend">
+      <span><i class="swatch img"></i>画像エリア</span>
+      <span><i class="swatch txt"></i>テキスト</span>
+      <span><i class="swatch btn"></i>ボタン</span>
+      <span>青枠の NOTE ＝なぜこのUIか</span>
+    </div>
+  </div>
+
+  <!-- 1. TOP -->
+  <section class="screen">
+    <div class="screen-cap">① TOPページ <small>入口の導線</small></div>
+    <div class="browser"><i></i><i></i><i></i><span class="url">petsit.example.com/</span></div>
+    <div class="pad">
+      <div class="site-head">
+        <div class="logo">ロゴ</div>
+        <div class="site-nav"><span class="btn ghost">使い方</span><span class="btn ghost">ログイン</span></div>
+      </div>
+
+      <div class="hero-title"></div>
+      <div class="bar w60"></div>
+
+      <div class="tabs">
+        <div class="tab on">シッターを探す</div>
+        <div class="tab">依頼を探す</div>
+      </div>
+      <div class="field sel">エリア・対応動物などで検索</div>
+      <div class="note">いきなり検索だけにせず、<b>2タブで「探す側／募集する側」の入口</b>を最初に見せる。</div>
+
+      <div class="label">使い方の流れ</div>
+      <div class="steps">
+        <div class="step"><div class="n">1</div>探す</div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="n">2</div>相談する</div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="n">3</div>直接やりとり</div>
+      </div>
+
+      <div class="label">ピックアップ</div>
+      <div class="grid">
+        <div class="card"><div class="img" style="height:90px">画像</div><div class="body"><div class="bar w75"></div><div class="bar w40"></div></div></div>
+        <div class="card"><div class="img" style="height:90px">画像</div><div class="body"><div class="bar w75"></div><div class="bar w40"></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. シッター一覧 -->
+  <section class="screen">
+    <div class="screen-cap">② シッター一覧ページ <small>分岐①：探す（易）</small></div>
+    <div class="browser"><i></i><i></i><i></i><span class="url">petsit.example.com/sitters/</span></div>
+    <div class="pad">
+      <div class="site-head"><div class="logo">ロゴ</div><div class="site-nav"><span class="btn ghost">使い方</span></div></div>
+
+      <div class="two-col">
+        <aside class="sidebar">
+          <h4>絞り込み</h4>
+          <div class="label">対応できる動物</div>
+          <div><span class="pill">□ 犬</span><span class="pill">□ 猫</span><span class="pill">□ 小動物</span></div>
+          <div class="label">エリア</div>
+          <div class="field sel">選択してください</div>
+          <div class="label">料金</div>
+          <div class="field">下限 〜 上限</div>
+          <div style="margin-top:12px"><span class="btn block">絞り込む</span></div>
+        </aside>
+
+        <div class="main">
+          <div class="toolbar">
+            <span class="bar w40" style="margin:0"></span>
+            <span class="field sel" style="width:160px;height:34px">並べ替え：料金が安い順</span>
+          </div>
+          <div class="grid">
+            <div class="card"><div class="img">画像</div><div class="body"><div class="bar w75"></div><div class="row"><span class="pill">犬</span><span class="pill">猫</span></div><div class="meta"><span class="price">¥2,000/時</span><span class="btn">詳細</span></div></div></div>
+            <div class="card"><div class="img">画像</div><div class="body"><div class="bar w75"></div><div class="row"><span class="pill">猫</span></div><div class="meta"><span class="price">¥1,500/時</span><span class="btn">詳細</span></div></div></div>
+            <div class="card"><div class="img">画像</div><div class="body"><div class="bar w75"></div><div class="row"><span class="pill">犬</span><span class="pill">小動物</span></div><div class="meta"><span class="price">¥2,500/時</span><span class="btn">詳細</span></div></div></div>
+            <div class="card"><div class="img">画像</div><div class="body"><div class="bar w75"></div><div class="row"><span class="pill">犬</span></div><div class="meta"><span class="price">¥1,800/時</span><span class="btn">詳細</span></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="note"><b>絞り込み軸（対応動物・エリア）＝タクソノミー</b>／料金など並べ替え用の値＝数値フィールド。PCはサイドバー、SPはヒーロー下に検索エリアを出す想定。</div>
+    </div>
+  </section>
+
+  <!-- 3. シッター詳細 -->
+  <section class="screen">
+    <div class="screen-cap">③ シッター詳細ページ <small>分岐②：問い合わせ（中）</small></div>
+    <div class="browser"><i></i><i></i><i></i><span class="url">petsit.example.com/sitters/123/</span></div>
+    <div class="pad">
+      <div class="site-head"><div class="logo">ロゴ</div><div class="site-nav"><span class="btn ghost">一覧へ戻る</span></div></div>
+      <div class="two-col">
+        <div class="img" style="width:230px;height:170px;flex:none">プロフィール画像</div>
+        <div class="main">
+          <div class="bar w60" style="height:18px"></div>
+          <div class="row" style="margin:8px 0"><span class="pill">犬</span><span class="pill">猫</span><span class="pill">東京・世田谷</span></div>
+          <div class="price" style="margin:6px 0">¥2,000/時</div>
+          <div class="bar w90"></div><div class="bar w90"></div><div class="bar w75"></div>
+          <div style="margin-top:16px"><span class="btn lg">このシッターに相談する</span></div>
+        </div>
+      </div>
+      <div class="note"><b>連絡先（メール等）はページに出さない。</b>「相談する」ボタンから問い合わせフォームへ遷移し、内部的にどのシッター宛かを引き渡す。</div>
+    </div>
+  </section>
+
+  <!-- 4. 問い合わせフォーム -->
+  <section class="screen">
+    <div class="screen-cap">④ 問い合わせフォーム <small>分岐②：問い合わせ（中）</small></div>
+    <div class="browser"><i></i><i></i><i></i><span class="url">petsit.example.com/contact/?sitter=123</span></div>
+    <div class="pad" style="max-width:520px;margin:0 auto">
+      <div class="label" style="font-size:14px">○○さんへの相談</div>
+      <div class="label">あなたのメールアドレス<span class="req">*</span></div><div class="field">example@mail.com</div>
+      <div class="label">お名前 / 会社名<span class="req">*</span></div><div class="field"></div>
+      <div class="label">ペットの種類</div><div class="field sel">犬</div>
+      <div class="label">預けたい期間</div><div class="field">例）7/10〜7/12</div>
+      <div class="label">相談内容<span class="req">*</span></div><div class="field area"></div>
+      <div style="margin-top:16px"><span class="btn lg block">この内容で相談する</span></div>
+      <div class="note"><b>送信内容はデータとして保存</b>（メールを送るだけにしない）。運営が「誰が誰に相談したか」を後から確認・集計できる。宛先シッターは hidden で保持。</div>
+    </div>
+  </section>
+
+  <!-- 5. 依頼一覧 -->
+  <section class="screen">
+    <div class="screen-cap">⑤ 依頼（お仕事）一覧ページ <small>分岐③：依頼を探す（中）</small></div>
+    <div class="browser"><i></i><i></i><i></i><span class="url">petsit.example.com/requests/</span></div>
+    <div class="pad">
+      <div class="site-head"><div class="logo">ロゴ</div><div class="site-nav"><span class="btn">依頼を掲載する</span></div></div>
+      <div class="toolbar">
+        <span class="field sel" style="width:200px">エリア・動物で検索</span>
+        <span class="field sel" style="width:150px;height:34px">並べ替え：新着順</span>
+      </div>
+      <div class="grid">
+        <div class="card"><div class="body"><div class="bar w90" style="height:14px"></div><div class="row" style="margin:8px 0"><span class="pill">犬</span><span class="pill">7/10〜7/12</span></div><div class="meta"><span class="price">¥15,000</span><span class="deadline soon">締切まで残り 2日</span></div><div style="margin-top:8px"><span class="btn block">詳細を見る</span></div></div></div>
+        <div class="card"><div class="body"><div class="bar w90" style="height:14px"></div><div class="row" style="margin:8px 0"><span class="pill">猫</span><span class="pill">7/20〜7/21</span></div><div class="meta"><span class="price">¥8,000</span><span class="deadline">締切まで残り 18日</span></div><div style="margin-top:8px"><span class="btn block">詳細を見る</span></div></div></div>
+      </div>
+      <div class="note">一覧・検索は<b>シッター一覧と同じ仕組みを再利用</b>。<b>締切間近（72時間以内）は赤字表示</b>＝表示時に期限を判定して出し分け。</div>
+    </div>
+  </section>
+
+  <!-- 6. 依頼掲載フォーム -->
+  <section class="screen">
+    <div class="screen-cap">⑥ 依頼の掲載フォーム（フロント投稿） <small>分岐④：掲載する（難・クライマックス）</small></div>
+    <div class="browser"><i></i><i></i><i></i><span class="url">petsit.example.com/requests/new/</span></div>
+    <div class="pad" style="max-width:520px;margin:0 auto">
+      <div class="label" style="font-size:14px">預かり依頼を掲載する</div>
+      <div class="label">タイトル<span class="req">*</span></div><div class="field"></div>
+      <div class="label">ペットの種類<span class="req">*</span></div><div class="field sel">犬</div>
+      <div class="label">預けたい期間<span class="req">*</span></div><div class="field"></div>
+      <div class="label">報酬</div><div class="field">¥</div>
+      <div class="label">募集期限<span class="req">*</span></div><div class="field sel">3日後（72時間）〜 30日後 から選択</div>
+      <div class="label">依頼内容<span class="req">*</span></div><div class="field area"></div>
+      <div style="margin-top:16px"><span class="btn lg block">この内容で掲載する</span></div>
+      <div class="note"><b>管理画面に入らずフロントから投稿／事前審査なしで即公開。</b>募集期限が過ぎると自動で掲載終了。運営は後から非表示にできる。修正は不可（＝編集導線はあえて作らず、削除→再投稿）。</div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
