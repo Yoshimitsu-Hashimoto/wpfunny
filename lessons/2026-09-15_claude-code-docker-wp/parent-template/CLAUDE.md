@@ -53,8 +53,28 @@
 | 管理者ID | `admin` |
 | パスワード | `password` |
 | メール | `yesmyoshi@gmail.com` |
-| 言語 | `ja` |
+| 言語 | `ja`（管理画面・サイトとも日本語） |
+| タイムゾーン | `Asia/Tokyo` |
+| 日付フォーマット | `Y年n月j日` |
+| 時刻フォーマット | `H:i` |
+| 週の開始曜日 | 月曜（`start_of_week` = 1） |
 | URL | `http://localhost:<割当ポート>` |
+
+## 既定で入れるプラグイン
+
+初期セットアップの最後に、次を**インストールして有効化**する。聞き直さない。
+
+| プラグイン | スラッグ | 用途 |
+|---|---|---|
+| All-in-One WP Migration | `all-in-one-wp-migration` | 本番との差し替え・バックアップ |
+| Wordfence Security | `wordfence` | セキュリティ |
+
+```bash
+docker compose exec wordpress wp plugin install all-in-one-wp-migration wordfence --activate
+```
+
+- インストールに失敗しても**環境構築自体は成功扱いにする**。失敗したプラグイン名を報告するだけでよい。
+- 案件で不要と言われたら入れない。追加のプラグインを指定されたら、それも同じ行に足す。
 
 ## WP-CLI の使い方
 
