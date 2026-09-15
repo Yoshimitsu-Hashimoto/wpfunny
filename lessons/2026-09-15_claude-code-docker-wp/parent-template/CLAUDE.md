@@ -76,6 +76,34 @@ docker compose exec wordpress wp plugin install all-in-one-wp-migration wordfenc
 - インストールに失敗しても**環境構築自体は成功扱いにする**。失敗したプラグイン名を報告するだけでよい。
 - 案件で不要と言われたら入れない。追加のプラグインを指定されたら、それも同じ行に足す。
 
+## 既定で消すもの
+
+初期セットアップの一環として削除する。**この削除は確認を取らない。**
+
+| 対象 | 理由 |
+|---|---|
+| Akismet | 使わない。契約が必要 |
+| Hello Dolly | 使わない |
+| サンプル投稿「Hello world!」 | 制作の邪魔になる |
+| サンプル固定ページ「Sample Page」 | 同上 |
+| プライバシーポリシー（下書き） | 同上 |
+
+```bash
+docker compose exec wordpress wp plugin delete akismet hello
+docker compose exec wordpress wp post delete $(docker compose exec wordpress wp post list --post_type=post,page --post_status=any --format=ids) --force
+```
+
+削除後、投稿0件・固定ページ0件になる。
+
+## パーマリンク
+
+`/%postname%/` を使う。デフォルトの `?p=123` は実務で使わない。
+
+```bash
+docker compose exec wordpress wp rewrite structure '/%postname%/'
+docker compose exec wordpress wp rewrite flush --hard
+```
+
 ## WP-CLI の使い方
 
 - WP-CLI は必ず `docker compose exec wordpress wp` 経由で実行する。ホストの `wp` は使わない。
@@ -90,6 +118,7 @@ docker compose exec wordpress wp plugin install all-in-one-wp-migration wordfenc
 - 次の2つだけ、実行前に必ず確認する。
   - ファイルやディレクトリの削除
   - `docker compose down -v` などボリュームの削除
+- ただし**「既定で消すもの」に挙げた初期セットアップ時の削除は例外**。確認せずに実行する。
 
 ## 参照
 
